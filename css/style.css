@@ -1,0 +1,20 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+
+#game {
+  /* 논리 480×640을 정수배(1.2배 아님)로 확대 — 세로 기준 최대 배율 */
+  width: calc(480px * 1);
+  height: calc(640px * 1);
+  image-rendering: pixelated;
+  background: #000;
+}
+
+@media (min-height: 1300px) {
+  #game { width: calc(480px * 2); height: calc(640px * 2); }
+}
