@@ -1,7 +1,8 @@
 import { WIDTH, HEIGHT } from '../config.js';
 import { createStarfield } from '../gfx/starfield.js';
 import { createBulletPool } from '../game/bullet.js';
-import { createPlayer } from '../game/player.js';
+import { createPlayer, applyPowerup } from '../game/player.js';
+import { createPowerupPool, rollDrop } from '../game/powerup.js';
 import { createFormation } from '../game/formation.js';
 import { createSpawner } from '../game/spawner.js';
 import { createParticlePool } from '../game/particles.js';
@@ -19,6 +20,7 @@ export function createPlayScene(game) {
   const playerBullets = createBulletPool(48);
   const enemyBullets = createBulletPool(64);
   const particles = createParticlePool(140);
+  const powerups = createPowerupPool(8);
   const player = createPlayer(game, playerBullets);
 
   let score = 0;
@@ -72,7 +74,9 @@ export function createPlayScene(game) {
     score += scoreFor(enemy);
     particles.burst(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, '#ffd24a', 10);
     game.audio?.play('explosion');
-    // 파워업 드롭은 Task 14에서 여기에 추가된다.
+
+    const drop = rollDrop(stage().dropRate);
+    if (drop) powerups.spawn(enemy.x, enemy.y, drop);
   }
 
   function playerDies() {
@@ -176,6 +180,17 @@ export function createPlayScene(game) {
           });
       }
 
+      powerups.update(dt, HEIGHT);
+
+      // 충돌 4: 파워업 → 플레이어
+      if (player.alive) {
+        forEachHit(powerups.items, [player], (item) => {
+          item.alive = false;
+          player.state = applyPowerup(player.state, item.type);
+          game.audio?.play('powerup');
+        });
+      }
+
       checkStageClear();
     },
 
@@ -187,6 +202,7 @@ export function createPlayScene(game) {
       for (const b of enemyBullets.items) {
         if (b.alive) ctx.drawImage(game.sprites.get(b.sprite), Math.round(b.x), Math.round(b.y));
       }
+      powerups.render(ctx, game.sprites);
       for (const enemy of livingEnemies()) enemy.render(ctx);
       for (const b of playerBullets.items) {
         if (b.alive) ctx.drawImage(game.sprites.get(b.sprite), Math.round(b.x), Math.round(b.y));
