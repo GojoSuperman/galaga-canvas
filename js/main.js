@@ -2,6 +2,7 @@ import { WIDTH, HEIGHT } from './config.js';
 import { createLoop } from './core/loop.js';
 import { createInput } from './core/input.js';
 import { createHighScores } from './core/storage.js';
+import { createAudio } from './core/audio.js';
 import { createSpriteFactory } from './gfx/spriteFactory.js';
 import { createSceneManager } from './scenes/sceneManager.js';
 import { createTitleScene } from './scenes/titleScene.js';
@@ -15,6 +16,7 @@ ctx.imageSmoothingEnabled = false;
 const input = createInput(window);
 const sprites = createSpriteFactory(3);
 const highScores = createHighScores(window.localStorage);
+const audio = createAudio(window.AudioContext ?? window.webkitAudioContext);
 
 const scenes = createSceneManager({
   title: createTitleScene,
@@ -26,6 +28,7 @@ scenes.setContext({
   input,
   sprites,
   highScores,
+  audio,
   changeScene: (name, params) => scenes.change(name, params),
 });
 
@@ -33,6 +36,13 @@ scenes.change('title');
 
 const loop = createLoop({
   update(dt) {
+    // 브라우저 자동재생 정책: 최초 사용자 입력이 있어야 소리를 낼 수 있다.
+    if (input.wasPressed('Space') || input.wasPressed('ArrowLeft') || input.wasPressed('ArrowRight')) {
+      audio.resume();
+      audio.startBgm();
+    }
+    if (input.wasPressed('KeyM')) audio.toggleMute();
+
     scenes.update(dt);
     input.endFrame(); // wasPressed는 한 프레임만 살아 있다.
   },
