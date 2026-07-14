@@ -12,7 +12,8 @@ test('경과 시간이 step에 못 미치면 update를 호출하지 않는다', 
 
 test('경과 시간만큼 update를 고정 step으로 반복 호출한다', () => {
   const updates = [];
-  const loop = createLoop({ update: (dt) => updates.push(dt), render: () => {}, step: 0.1 });
+  // maxFrameTime을 넉넉히 줘서 클램프가 아니라 '누적'만 검사한다 (클램프는 아래 테스트에서 따로 본다).
+  const loop = createLoop({ update: (dt) => updates.push(dt), render: () => {}, step: 0.1, maxFrameTime: 1 });
   loop.tick(0);
   loop.tick(0.35);
   assert.equal(updates.length, 3);

@@ -3,7 +3,7 @@
  * tick(now)에 현재 시각(초)을 주면, 누적 시간을 step 단위로 소비하며 update를 반복 호출한다.
  * 시간 소스를 주입받으므로 requestAnimationFrame 없이 테스트할 수 있다.
  */
-export function createLoop({ update, render, step = 1 / 60, maxFrameTime = 1.0 }) {
+export function createLoop({ update, render, step = 1 / 60, maxFrameTime = 0.25 }) {
   let lastTime = null;
   let accumulator = 0;
 
