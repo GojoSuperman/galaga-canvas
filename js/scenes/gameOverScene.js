@@ -3,8 +3,9 @@ import { createStarfield } from '../gfx/starfield.js';
 
 export function createGameOverScene(game, { score = 0, cleared = false } = {}) {
   const stars = createStarfield();
-  const ranked = game.highScores.save(score);
-  const isNewBest = ranked[0] === score && score > 0;
+  // 0점은 하이스코어 테이블에 남길 가치가 없다 — 그대로 저장하면 TOP 5가 000000으로 채워진다.
+  const ranked = score > 0 ? game.highScores.save(score) : game.highScores.load();
+  const isNewBest = score > 0 && ranked[0] === score;
 
   return {
     update(dt) {
