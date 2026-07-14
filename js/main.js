@@ -1,35 +1,48 @@
 import { WIDTH, HEIGHT } from './config.js';
 import { createLoop } from './core/loop.js';
+import { createInput } from './core/input.js';
+import { createHighScores } from './core/storage.js';
 import { createSpriteFactory } from './gfx/spriteFactory.js';
-import { SPRITES } from './gfx/pixels.js';
+import { createSceneManager } from './scenes/sceneManager.js';
+import { createTitleScene } from './scenes/titleScene.js';
+import { createPlayScene } from './scenes/playScene.js';
+import { createGameOverScene } from './scenes/gameOverScene.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
+const input = createInput(window);
 const sprites = createSpriteFactory(3);
+const highScores = createHighScores(window.localStorage);
 
-function update() {}
+const scenes = createSceneManager({
+  title: createTitleScene,
+  play: createPlayScene,
+  gameover: createGameOverScene,
+});
 
-function render() {
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+scenes.setContext({
+  input,
+  sprites,
+  highScores,
+  changeScene: (name, params) => scenes.change(name, params),
+});
 
-  // 임시 스프라이트 검수 화면 — Task 6에서 씬으로 대체된다.
-  let x = 20;
-  let y = 40;
-  ctx.fillStyle = '#888';
-  ctx.font = '10px monospace';
-  for (const name of Object.keys(SPRITES)) {
-    const img = sprites.get(name);
-    ctx.drawImage(img, x, y);
-    ctx.fillText(name, x, y + img.height + 12);
-    x += 90;
-    if (x > WIDTH - 90) { x = 20; y += 100; }
-  }
-}
+scenes.change('title');
 
-const loop = createLoop({ update, render });
+const loop = createLoop({
+  update(dt) {
+    scenes.update(dt);
+    input.endFrame(); // wasPressed는 한 프레임만 살아 있다.
+  },
+  render() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    scenes.render(ctx);
+  },
+});
+
 function frame(nowMs) {
   loop.tick(nowMs / 1000);
   requestAnimationFrame(frame);
