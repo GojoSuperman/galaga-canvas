@@ -183,20 +183,34 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
       if (boss?.alive) {
         boss.update(dt, player.x + player.w / 2, player.y);
 
-        // 보스가 요청하면 졸개를 소환한다 (2페이즈부터).
+        // 보스가 요청하면 졸개를 여러 마리 소환한다 (2페이즈부터).
+        // 서로 다른 열(col)에 소환해야 한다 — 같은 (col, row) 슬롯에 두 마리가
+        // 겹치면 한 마리가 다른 한 마리 위에 그대로 포개져 보이지 않게 되는
+        // 버그가 생기기 때문이다. 이미 살아있는 적이 차지한 열도 제외해서,
+        // 이전 웨이브의 졸개가 아직 안 죽었는데 그 자리에 또 소환되는 것도 막는다.
         if (boss.wantsSummon) {
           boss.wantsSummon = false;
-          const freeCols = [1, 3, 5, 7];
-          const col = freeCols[Math.floor(Math.random() * freeCols.length)];
-          spawner.enemies.push(createEnemy({
-            type: 'bee',
-            col,
-            row: 3,
-            entryPath: 'topDive',
-            entryDuration: 2,
-            formation,
-            game,
-          }));
+          const occupiedCols = new Set(
+            livingEnemies().filter((e) => e.row === 3).map((e) => e.col),
+          );
+          const freeCols = [0, 1, 2, 3, 4, 5, 6, 7].filter((c) => !occupiedCols.has(c));
+          // Fisher–Yates 셔플로 겹치지 않는 열을 무작위 순서로 뽑는다.
+          for (let i = freeCols.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [freeCols[i], freeCols[j]] = [freeCols[j], freeCols[i]];
+          }
+          const cols = freeCols.slice(0, boss.summonCount);
+          for (const col of cols) {
+            spawner.enemies.push(createEnemy({
+              type: 'bee',
+              col,
+              row: 3,
+              entryPath: 'topDive',
+              entryDuration: 2,
+              formation,
+              game,
+            }));
+          }
         }
       }
 

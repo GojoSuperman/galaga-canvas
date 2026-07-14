@@ -6,13 +6,18 @@ export const BOSS_W = 48; // 16px × scale 3
 export const BOSS_H = 36; // 12px × scale 3
 export const BOSS_Y = 60;
 
-/** 보스 티어별 능력치. 1 = 중간 보스(5스테이지), 2 = 최종 보스(10스테이지). */
+/**
+ * 보스 티어별 능력치. 1 = 중간 보스(5스테이지), 2 = 최종 보스(10스테이지).
+ * 플레이테스트 반영: 체력을 2/3로 낮추고(장기 딜레이 감소), 대신 졸개 소환을
+ * 더 자주·더 많이 하도록 조정했다 — "보스를 오래 때리는" 대신 "졸개를 정리하며
+ * 보스를 깎는" 형태로 전투의 무게중심을 옮긴다.
+ */
 export const BOSS_TIERS = {
   1: {
-    maxHp: 120, speedScale: 1.0, bulletSpeedScale: 1.0, spreadBonus: 0,
+    maxHp: 80, speedScale: 1.0, bulletSpeedScale: 1.0, spreadBonus: 0, summonInterval: 5, summonCount: 2,
   },
   2: {
-    maxHp: 220, speedScale: 1.35, bulletSpeedScale: 1.25, spreadBonus: 2,
+    maxHp: 147, speedScale: 1.35, bulletSpeedScale: 1.25, spreadBonus: 2, summonInterval: 4, summonCount: 3,
   },
 };
 
@@ -28,8 +33,6 @@ export const BOSS_PHASE_CONFIG = {
     moveSpeed: 140, shootInterval: 0.7, spreadCount: 7, bulletSpeed: 260, summon: true, aimed: true,
   },
 };
-
-export const SUMMON_INTERVAL = 6; // 초 — 졸개 소환 간격
 
 /** HP 비율(0~1)로 페이즈를 정한다. 티어와 무관하게 항상 비율 기준이다. */
 export function bossPhase(hpRatio) {
@@ -52,7 +55,8 @@ function phaseConfig(phase, tier) {
 
 /** 보스 생성. tier=1(중간 보스, 기본값) | 2(최종 보스). */
 export function createBoss(game, enemyBullets, tier = 1) {
-  const maxHp = BOSS_TIERS[tier].maxHp;
+  const tierConfig = BOSS_TIERS[tier];
+  const maxHp = tierConfig.maxHp;
   const label = tier === 2 ? 'FINAL BOSS' : 'BOSS';
 
   const boss = {
@@ -67,7 +71,8 @@ export function createBoss(game, enemyBullets, tier = 1) {
     phase: 1,
     direction: 1,       // 1 = 오른쪽, -1 = 왼쪽
     shootTimer: 1.5,    // 등장 직후 잠깐의 유예
-    summonTimer: SUMMON_INTERVAL,
+    summonTimer: tierConfig.summonInterval,
+    summonCount: tierConfig.summonCount, // 소환 요청 시 몇 마리를 소환할지 — playScene이 읽는다
     hitFlash: 0,        // 피격 시 흰색 점멸
     wantsSummon: false, // playScene이 읽고 졸개를 소환한 뒤 false로 되돌린다
 
@@ -96,7 +101,7 @@ export function createBoss(game, enemyBullets, tier = 1) {
       if (config.summon) {
         this.summonTimer -= dt;
         if (this.summonTimer <= 0) {
-          this.summonTimer = SUMMON_INTERVAL;
+          this.summonTimer = tierConfig.summonInterval;
           this.wantsSummon = true; // 실제 소환은 playScene이 한다
         }
       }

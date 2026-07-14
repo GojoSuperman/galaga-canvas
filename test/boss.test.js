@@ -109,3 +109,22 @@ test('페이즈 전이 기준은 티어와 무관하게 비율로 정해진다',
 test('최종 보스가 중간 보스보다 확산탄이 많다', () => {
   assert.ok(BOSS_TIERS[2].spreadBonus > 0);
 });
+
+test('보스 티어마다 소환 간격과 소환 수가 정의돼 있다', () => {
+  for (const tier of [1, 2]) {
+    assert.ok(BOSS_TIERS[tier].summonInterval > 0, `티어 ${tier}: summonInterval 없음`);
+    assert.ok(BOSS_TIERS[tier].summonCount >= 1, `티어 ${tier}: summonCount 없음`);
+  }
+});
+
+test('최종 보스가 졸개를 더 자주, 더 많이 소환한다', () => {
+  assert.ok(BOSS_TIERS[2].summonInterval < BOSS_TIERS[1].summonInterval);
+  assert.ok(BOSS_TIERS[2].summonCount > BOSS_TIERS[1].summonCount);
+});
+
+test('보스는 자기 티어의 소환 수를 노출한다', () => {
+  const mid = createBoss(fakeGame, fakeBullets, 1);
+  const final = createBoss(fakeGame, fakeBullets, 2);
+  assert.equal(mid.summonCount, BOSS_TIERS[1].summonCount);
+  assert.equal(final.summonCount, BOSS_TIERS[2].summonCount);
+});
