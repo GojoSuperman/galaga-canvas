@@ -42,6 +42,18 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
   // (슬롯으로 잡으면 첫 프레임에 경로 시작점으로 순간이동하는 별개의 팝이 생긴다.)
   const startPos = entryFollower.position();
 
+  /**
+   * follower의 현재 위치에, 경로를 만든 시점 이후 대형이 흔들린 만큼(swayDelta) x를 보정해 적용한다.
+   * (보정하지 않으면 진입/복귀가 끝나 대형에 합류하는 순간 수십 px 순간이동한다.)
+   * ENTERING과 RETURNING 두 상태에서 동일하게 쓰인다.
+   */
+  function applySwayCorrectedPosition(target) {
+    const pos = target.follower.position();
+    const swayDelta = swayOffset(formation.time) - target.swayAtBuild;
+    target.x = pos.x + swayDelta;
+    target.y = pos.y;
+  }
+
   const enemy = {
     type,
     col,
@@ -70,12 +82,7 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
       switch (this.state) {
         case ENEMY_STATE.ENTERING: {
           this.follower.update(dt);
-          const pos = this.follower.position();
-          // 경로는 만들 때의 슬롯 위치로 고정돼 있다. 그 사이 대형이 흔들린 만큼 x를 보정해
-          // 경로 끝점이 현재 슬롯을 정확히 따라가게 한다 (보정하지 않으면 합류 순간 수십 px 순간이동한다).
-          const swayDelta = swayOffset(formation.time) - this.swayAtBuild;
-          this.x = pos.x + swayDelta;
-          this.y = pos.y;
+          applySwayCorrectedPosition(this);
           if (this.follower.done) this.state = ENEMY_STATE.IN_FORMATION;
           break;
         }
@@ -93,19 +100,15 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
           const pos = this.follower.position();
           this.x = pos.x;
           this.y = pos.y;
-          this.shootTimer = Math.max(0, this.shootTimer - dt);
+          // shootTimer는 여기서 깎지 않는다 — playScene의 enemyShooting(dt)가 소유한다.
+          // (여기서도 깎으면 두 배로 깎여 실제 사격 간격이 stage 데이터의 절반이 된다.)
           if (this.follower.done) this.startReturn();
           break;
         }
 
         case ENEMY_STATE.RETURNING: {
           this.follower.update(dt);
-          const pos = this.follower.position();
-          // 경로는 만들 때의 슬롯 위치로 고정돼 있다. 그 사이 대형이 흔들린 만큼 x를 보정해
-          // 경로 끝점이 현재 슬롯을 정확히 따라가게 한다 (보정하지 않으면 합류 순간 수십 px 순간이동한다).
-          const swayDelta = swayOffset(formation.time) - this.swayAtBuild;
-          this.x = pos.x + swayDelta;
-          this.y = pos.y;
+          applySwayCorrectedPosition(this);
           if (this.follower.done) this.state = ENEMY_STATE.IN_FORMATION;
           break;
         }

@@ -142,6 +142,16 @@ test('진입 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () =
   assert.ok(maxJump < 5, `진입 합류에서 ${maxJump.toFixed(1)}px 순간이동 발생`);
 });
 
+test('적은 자기 사격 쿨다운을 직접 깎지 않는다 (playScene이 소유)', () => {
+  const enemy = makeEnemy({ entryDuration: 0.1 });
+  enemy.update(0.2);           // 대형 합류
+  enemy.startDive(240, 2.5);
+  const before = enemy.shootTimer;
+  enemy.update(0.5);           // 적 자신의 update는 shootTimer를 건드리면 안 된다
+  assert.equal(enemy.shootTimer, before,
+    `enemy.update()가 shootTimer를 깎았다: ${before} → ${enemy.shootTimer}`);
+});
+
 test('복귀 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () => {
   const formation = createFormation();
   const enemy = makeEnemy({ formation, col: 3, row: 1, entryDuration: 0.1 });

@@ -4,6 +4,10 @@
 // diveInterval  — 대형에서 적을 급강하로 뽑아내는 간격(초). 작을수록 어렵다.
 // diveCount     — 한 번에 뽑는 적 수
 // diveDuration  — 급강하 곡선을 다 도는 데 걸리는 시간(초). 작을수록 빠르다.
+// enemyShootInterval — 급강하 중인 적의 실제 사격 간격(초). 예전에는 enemy.js와 playScene.js가
+//   shootTimer를 이중으로 깎는 버그가 있어 실제 간격이 여기 적힌 값의 절반이었다(=화력이 2배였다).
+//   그 버그를 고치면서, 이미 그 화력으로 플레이테스트해 밸런싱한 결과를 그대로 유지하기 위해
+//   여기 값을 전부 절반으로 낮췄다 — 지금부터는 이 값이 실제 사격 간격과 일치한다.
 
 export const STAGES = [
   // ── 스테이지 1 — 벌 8기, 급강하 드묾 ────────────────────────
@@ -16,7 +20,7 @@ export const STAGES = [
     diveCount: 1,
     diveDuration: 3.0,
     enemyBulletSpeed: 170,
-    enemyShootInterval: 1.0,
+    enemyShootInterval: 0.5,
     dropRate: 0.12,
     isBoss: false,
   },
@@ -32,7 +36,7 @@ export const STAGES = [
     diveCount: 1,
     diveDuration: 2.8,
     enemyBulletSpeed: 190,
-    enemyShootInterval: 0.9,
+    enemyShootInterval: 0.45,
     dropRate: 0.12,
     isBoss: false,
   },
@@ -48,7 +52,7 @@ export const STAGES = [
     diveCount: 2,
     diveDuration: 2.6,
     enemyBulletSpeed: 210,
-    enemyShootInterval: 0.8,
+    enemyShootInterval: 0.4,
     dropRate: 0.10,
     isBoss: false,
   },
@@ -65,7 +69,7 @@ export const STAGES = [
     diveCount: 2,
     diveDuration: 2.3,
     enemyBulletSpeed: 230,
-    enemyShootInterval: 0.7,
+    enemyShootInterval: 0.35,
     dropRate: 0.10,
     isBoss: false,
   },
@@ -80,7 +84,7 @@ export const STAGES = [
     diveCount: 1,
     diveDuration: 2.5,
     enemyBulletSpeed: 240,
-    enemyShootInterval: 0.8,
+    enemyShootInterval: 0.4,
     dropRate: 0.20, // 보스전은 드롭을 후하게
     isBoss: true,
     bossTier: 1,
@@ -98,7 +102,7 @@ export const STAGES = [
     diveCount: 2,
     diveDuration: 2.2,
     enemyBulletSpeed: 245,
-    enemyShootInterval: 0.70,
+    enemyShootInterval: 0.35,
     dropRate: 0.12,
     isBoss: false,
   },
@@ -116,7 +120,7 @@ export const STAGES = [
     diveCount: 3,
     diveDuration: 2.1,
     enemyBulletSpeed: 255,
-    enemyShootInterval: 0.65,
+    enemyShootInterval: 0.325,
     dropRate: 0.12,
     isBoss: false,
   },
@@ -134,7 +138,7 @@ export const STAGES = [
     diveCount: 3,
     diveDuration: 2.0,
     enemyBulletSpeed: 265,
-    enemyShootInterval: 0.60,
+    enemyShootInterval: 0.30,
     dropRate: 0.14,
     isBoss: false,
   },
@@ -153,7 +157,7 @@ export const STAGES = [
     diveCount: 4,
     diveDuration: 1.9,
     enemyBulletSpeed: 280,
-    enemyShootInterval: 0.55,
+    enemyShootInterval: 0.275,
     dropRate: 0.15,
     isBoss: false,
   },
@@ -168,7 +172,7 @@ export const STAGES = [
     diveCount: 1,
     diveDuration: 2.2,
     enemyBulletSpeed: 280,
-    enemyShootInterval: 0.7,
+    enemyShootInterval: 0.35,
     dropRate: 0.25, // 최종전은 드롭을 후하게
     isBoss: true,
     bossTier: 2, // 최종 보스
