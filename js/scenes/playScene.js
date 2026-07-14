@@ -12,6 +12,7 @@ import { getStage, STAGES } from '../stages/stages.js';
 import { ENEMY_STATE, createEnemy } from '../game/enemy.js';
 import { createBoss } from '../game/boss.js';
 import { enemyShotVelocity } from '../game/shooting.js';
+import { createHud } from '../ui/hud.js';
 
 const INITIAL_LIVES = 3;
 const RESPAWN_DELAY = 1.2;   // 초 — 사망 후 부활까지
@@ -29,6 +30,7 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
   const particles = createParticlePool(140);
   const powerups = createPowerupPool(8);
   const player = createPlayer(game, playerBullets);
+  const hud = createHud(game);
 
   let score = 0;
   let lives = INITIAL_LIVES;
@@ -266,12 +268,12 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
       player.render(ctx);
       particles.render(ctx);
 
-      // 임시 HUD — Task 16에서 hud.js로 대체된다.
-      ctx.fillStyle = '#fff';
-      ctx.font = '12px monospace';
-      ctx.fillText(`SCORE ${score}`, 10, 20);
-      ctx.fillText(`LIVES ${lives}`, 10, 36);
-      ctx.fillText(`STAGE ${stageIndex + 1}`, WIDTH - 90, 20);
+      hud.render(ctx, {
+        score,
+        lives,
+        stageNumber: stageIndex + 1,
+        playerState: player.state,
+      });
 
       if (phase === 'stageClear') {
         ctx.textAlign = 'center';
