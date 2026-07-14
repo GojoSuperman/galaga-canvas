@@ -64,7 +64,12 @@ const loop = createLoop({
 });
 
 function frame(nowMs) {
-  loop.tick(nowMs / 1000);
-  requestAnimationFrame(frame);
+  try {
+    loop.tick(nowMs / 1000);
+  } finally {
+    // 한 프레임이 예외를 던져도 루프는 살아 있어야 한다.
+    // (rAF를 다시 걸지 않으면 게임이 영구 정지하고 화면엔 아무 신호도 없다.)
+    requestAnimationFrame(frame);
+  }
 }
 requestAnimationFrame(frame);
