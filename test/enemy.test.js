@@ -183,3 +183,45 @@ test('복귀 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () =
   assert.equal(enemy.state, ENEMY_STATE.IN_FORMATION);
   assert.ok(maxJump < 5, `복귀 합류에서 ${maxJump.toFixed(1)}px 순간이동 발생`);
 });
+
+// ── 실효 화력 회귀 방지 ─────────────────────────────────────────
+// 쿨다운 이중 감소 버그를 고칠 때 stages.js의 enemyShootInterval은 절반으로 낮췄으나
+// startDive의 첫 발 대기값(shootTimer)을 안 낮춰서, 급강하당 사격이 6발→5발로 줄었다.
+// 유닛 테스트가 '실제로 몇 발 쏘는지'를 안 봤기 때문에 149개가 전부 통과했다.
+// 이 테스트가 그 구멍을 막는다 — playScene의 사격 루프를 그대로 재현해서 발수를 센다.
+
+/** playScene.enemyShooting과 동일한 순서로 한 번의 급강하 동안 발사 시각을 기록한다. */
+function recordDiveShots(shootInterval, diveDuration) {
+  const formation = createFormation();
+  const enemy = makeEnemy({ formation, entryDuration: 0.1 });
+
+  const dt = 1 / 60;
+  for (let i = 0; i < 20; i += 1) { formation.update(dt); enemy.update(dt); } // 대형 합류
+  enemy.startDive(240, diveDuration);
+
+  const shots = [];
+  let t = 0;
+  while (enemy.state === ENEMY_STATE.DIVING) {
+    formation.update(dt);
+    enemy.update(dt);                       // 적은 shootTimer를 건드리지 않는다
+    enemy.shootTimer -= dt;                 // playScene이 소유한다
+    if (enemy.shootTimer <= 0) {
+      enemy.shootTimer = shootInterval;
+      shots.push(Number(t.toFixed(3)));
+    }
+    t += dt;
+  }
+  return shots;
+}
+
+test('급강하 1회당 사격 횟수가 유지된다 (스테이지 1 기준 6발)', () => {
+  const shots = recordDiveShots(0.5, 3.0); // 스테이지 1: enemyShootInterval 0.5, diveDuration 3.0
+  assert.equal(shots.length, 6, `급강하당 6발이어야 하는데 ${shots.length}발: ${shots}`);
+  assert.ok(shots[0] < 0.25, `첫 발이 너무 늦다 (${shots[0]}초). startDive의 shootTimer 초기값을 확인하라.`);
+});
+
+test('급강하 1회당 사격 횟수가 유지된다 (스테이지 6·10 기준 6발)', () => {
+  // 이 두 스테이지가 정확히 6발/5발 경계에 있어서, 첫 발이 0.2초만 밀려도 한 발을 잃는다.
+  const shots = recordDiveShots(0.35, 2.2);
+  assert.equal(shots.length, 6, `급강하당 6발이어야 하는데 ${shots.length}발: ${shots}`);
+});

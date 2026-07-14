@@ -75,7 +75,11 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
       if (this.state !== ENEMY_STATE.IN_FORMATION) return;
       this.state = ENEMY_STATE.DIVING;
       this.follower = createPathFollower(divePath({ x: this.x, y: this.y }, playerX), duration);
-      this.shootTimer = 0.4; // 급강하 시작 직후 첫 발
+      // 급강하 시작 직후 첫 발까지의 대기.
+      // stages.js의 enemyShootInterval과 함께 절반으로 낮춘 값이다 — 예전에는 쿨다운이
+      // 이중으로 깎여 이 값도 2배 속도로 닳았다. 여기만 안 낮추면 첫 발이 0.2초 밀려
+      // 급강하당 사격이 6발에서 5발로 줄어든다 (스테이지 6·10).
+      this.shootTimer = 0.2;
     },
 
     update(dt) {

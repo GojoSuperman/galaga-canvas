@@ -101,6 +101,9 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
     particles.burst(player.x + player.w / 2, player.y + player.h / 2, '#e94040', 20);
     lives -= 1;
     if (lives <= 0) {
+      // phase를 먼저 벗어난다. 이 프레임의 나머지(checkStageClear)가 계속 돌면
+      // 마지막 적을 들이받고 죽는 순간 스테이지 클리어 팡파르가 함께 울린다.
+      phase = 'gameover';
       game.changeScene('gameover', { score, cleared: false });
       return;
     }
@@ -142,6 +145,10 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
 
       stars.update(dt);
       particles.update(dt);
+
+      // 게임오버가 확정돼 씬이 교체되는 중이다. 아래 'playing' 코드는 fall-through라
+      // 여기서 막지 않으면 죽은 플레이어로 게임 로직이 한 프레임 더 돈다.
+      if (phase === 'gameover') return;
 
       if (phase === 'respawning') {
         phaseTimer -= dt;
