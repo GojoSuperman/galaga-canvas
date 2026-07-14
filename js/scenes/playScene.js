@@ -9,8 +9,9 @@ import { createParticlePool } from '../game/particles.js';
 import { forEachHit } from '../game/collision.js';
 import { scoreFor, STAGE_CLEAR_BONUS, BOSS_SCORE } from '../game/score.js';
 import { getStage, STAGES } from '../stages/stages.js';
-import { ENEMY_STATE, ENEMY_TYPES, createEnemy } from '../game/enemy.js';
-import { createBoss, aimedShot } from '../game/boss.js';
+import { ENEMY_STATE, createEnemy } from '../game/enemy.js';
+import { createBoss } from '../game/boss.js';
+import { enemyShotVelocity } from '../game/shooting.js';
 
 const INITIAL_LIVES = 3;
 const RESPAWN_DELAY = 1.2;   // 초 — 사망 후 부활까지
@@ -74,10 +75,10 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
       const speed = stage().enemyBulletSpeed;
 
       // 엘리트는 플레이어를 향해 쏜다. 나머지는 그대로 아래로 쏜다.
-      const aimed = ENEMY_TYPES[enemy.type].aimed && player.alive;
-      const { vx, vy } = aimed
-        ? aimedShot(originX, originY, player.x + player.w / 2, player.y + player.h / 2, speed)
-        : { vx: 0, vy: speed };
+      const target = player.alive
+        ? { x: player.x + player.w / 2, y: player.y + player.h / 2 }
+        : null;
+      const { vx, vy } = enemyShotVelocity(enemy.type, { x: originX, y: originY }, target, speed);
 
       enemyBullets.spawn({
         x: originX - 1.5, y: originY, vx, vy, w: 3, h: 12, sprite: 'enemyShot',

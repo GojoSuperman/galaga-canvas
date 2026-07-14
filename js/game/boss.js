@@ -1,10 +1,11 @@
 import { WIDTH } from '../config.js';
+import { spreadShot, aimedShot } from './shooting.js';
+
+export { spreadShot, aimedShot };
 
 export const BOSS_W = 48; // 16px × scale 3
 export const BOSS_H = 36; // 12px × scale 3
 export const BOSS_Y = 60;
-
-const SPREAD_ARC = Math.PI / 3; // 확산탄이 퍼지는 각도(60°)
 
 /** 보스 티어별 능력치. 1 = 중간 보스(5스테이지), 2 = 최종 보스(10스테이지). */
 export const BOSS_TIERS = {
@@ -48,29 +49,6 @@ function phaseConfig(phase, tier) {
     bulletSpeed: base.bulletSpeed * scale.bulletSpeedScale,
     spreadCount: base.spreadCount + scale.spreadBonus,
   };
-}
-
-/** 부채꼴 확산탄의 속도 벡터들. 아래(+y)를 중심으로 좌우 대칭. */
-export function spreadShot(originX, originY, count, speed) {
-  const shots = [];
-  const step = count > 1 ? SPREAD_ARC / (count - 1) : 0;
-  const start = -SPREAD_ARC / 2;
-  for (let i = 0; i < count; i += 1) {
-    const angle = start + step * i; // 0이 정중앙(수직 아래)
-    shots.push({
-      vx: Math.sin(angle) * speed,
-      vy: Math.cos(angle) * speed,
-    });
-  }
-  return shots;
-}
-
-/** 목표 지점을 향하는 조준탄 속도 벡터. */
-export function aimedShot(originX, originY, targetX, targetY, speed) {
-  const dx = targetX - originX;
-  const dy = targetY - originY;
-  const dist = Math.hypot(dx, dy) || 1; // 0으로 나누기 방지
-  return { vx: (dx / dist) * speed, vy: (dy / dist) * speed };
 }
 
 /** 보스 생성. tier=1(중간 보스, 기본값) | 2(최종 보스). */
