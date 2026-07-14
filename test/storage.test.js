@@ -45,6 +45,12 @@ test('저장된 JSON이 깨져 있으면 빈 배열로 복구한다', () => {
   assert.deepEqual(hs.load(), []);
 });
 
+test('저장된 점수 중 Infinity/NaN은 걸러진다', () => {
+  const hs = createHighScores(createFakeStore({ 'galaga.highscores': '[1e999, 100]' }));
+  assert.deepEqual(hs.load(), [100]);
+  assert.notEqual(hs.best(), Infinity);
+});
+
 test('저장소가 예외를 던져도 게임이 죽지 않는다', () => {
   const brokenStore = {
     getItem() { throw new Error('접근 거부'); },

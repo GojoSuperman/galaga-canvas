@@ -19,7 +19,7 @@ export function createHighScores(store) {
     try {
       const raw = store.getItem(KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      cache = Array.isArray(parsed) ? parsed.filter((n) => typeof n === 'number') : [];
+      cache = Array.isArray(parsed) ? parsed.filter((n) => Number.isFinite(n)) : [];
     } catch {
       cache = []; // 저장소가 막혔거나 JSON이 깨진 경우
     }
