@@ -95,7 +95,12 @@ export function createPlayer(game, bulletPool) {
       const speed = PLAYER_BASE_SPEED * (this.state.speedTimer > 0 ? SPEED_MULTIPLIER : 1);
       if (input.isDown('ArrowLeft')) this.x -= speed * dt;
       if (input.isDown('ArrowRight')) this.x += speed * dt;
-      this.x = Math.max(0, Math.min(WIDTH - this.w, this.x)); // 화면 밖으로 못 나간다
+
+      // 터치 드래그 — 끈 만큼 그대로 움직인다 (속도 버프는 드래그 감도에 곱해진다).
+      const drag = input.dragDelta ?? 0;
+      if (drag !== 0) this.x += drag * (this.state.speedTimer > 0 ? SPEED_MULTIPLIER : 1);
+
+      this.x = Math.max(0, Math.min(WIDTH - this.w, this.x)); // 화면 밖으로 못 나간다 (클램프는 마지막에)
 
       if (input.isDown('Space') && this.cooldown === 0) this.shoot();
     },

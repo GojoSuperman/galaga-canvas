@@ -7,7 +7,7 @@ export function createTitleScene(game) {
   return {
     update(dt) {
       stars.update(dt);
-      if (game.input.wasPressed('Space')) game.changeScene('play');
+      if (game.input.wasPressed('Space') || game.input.wasPressed('Enter')) game.changeScene('play');
     },
     render(ctx) {
       ctx.fillStyle = '#000';
@@ -21,11 +21,12 @@ export function createTitleScene(game) {
 
       ctx.fillStyle = '#fff';
       ctx.font = '14px monospace';
-      ctx.fillText('SPACE 키로 시작', WIDTH / 2, 300);
+      ctx.fillText('SPACE / ENTER / 화면 터치로 시작', WIDTH / 2, 300);
 
       ctx.fillStyle = '#8080a0';
       ctx.font = '12px monospace';
       ctx.fillText('← → 이동   SPACE 발사   P 일시정지   M 음소거', WIDTH / 2, 340);
+      ctx.fillText('모바일: 드래그로 이동, 꾹 눌러 연사', WIDTH / 2, 360);
 
       const scores = game.highScores.load();
       ctx.fillStyle = '#5ce1e6';

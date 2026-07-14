@@ -23,7 +23,7 @@ function safeLocalStorage() {
   }
 }
 
-const input = createInput(window);
+const input = createInput(window, canvas);
 const sprites = createSpriteFactory(3);
 const highScores = createHighScores(safeLocalStorage());
 const audio = createAudio(window.AudioContext ?? window.webkitAudioContext);
@@ -47,6 +47,7 @@ scenes.change('title');
 const loop = createLoop({
   update(dt) {
     // 브라우저 자동재생 정책: 최초 사용자 입력이 있어야 소리를 낼 수 있다.
+    // 모바일 탭도 createInput 내부에서 Space의 wasPressed를 함께 발동시키므로 별도 분기가 필요 없다.
     if (input.wasPressed('Space') || input.wasPressed('ArrowLeft') || input.wasPressed('ArrowRight')) {
       audio.resume();
       audio.startBgm();

@@ -2,8 +2,19 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createPlayerState, applyPowerup, tickBuffs, onPlayerHit, shotOffsets,
+  createPlayer,
   MAX_WEAPON_LEVEL, BUFF_DURATION,
 } from '../js/game/player.js';
+import { WIDTH } from '../js/config.js';
+
+/** input의 최소 껍데기 — isDown은 항상 false, dragDelta만 지정값을 갖는다. */
+function fakeInput({ dragDelta = 0 } = {}) {
+  return { isDown: () => false, dragDelta };
+}
+
+function fakeGame() {
+  return { audio: null, sprites: { get: () => ({}) } };
+}
 
 test('초기 상태는 무기 1레벨, 실드 없음, 버프 없음', () => {
   assert.deepEqual(createPlayerState(), {
@@ -97,4 +108,29 @@ test('3레벨은 좌우로 퍼지는 탄이 있다', () => {
   assert.ok(shots.some((s) => s.vx < 0), '왼쪽으로 퍼지는 탄이 있어야 한다');
   assert.ok(shots.some((s) => s.vx > 0), '오른쪽으로 퍼지는 탄이 있어야 한다');
   assert.ok(shots.some((s) => s.vx === 0), '가운데 수직 탄이 있어야 한다');
+});
+
+// ── 터치 드래그 이동 ─────────────────────────────────────────────
+
+test('dragDelta만큼 플레이어가 이동한다', () => {
+  const player = createPlayer(fakeGame(), { spawn() {} });
+  const startX = player.x;
+  player.update(1 / 60, fakeInput({ dragDelta: 20 }));
+  assert.equal(player.x, startX + 20);
+});
+
+test('음수 dragDelta는 왼쪽으로 이동시킨다', () => {
+  const player = createPlayer(fakeGame(), { spawn() {} });
+  const startX = player.x;
+  player.update(1 / 60, fakeInput({ dragDelta: -20 }));
+  assert.equal(player.x, startX - 20);
+});
+
+test('큰 dragDelta로도 화면 밖으로 나가지 않는다 (클램프)', () => {
+  const player = createPlayer(fakeGame(), { spawn() {} });
+  player.update(1 / 60, fakeInput({ dragDelta: 100000 }));
+  assert.equal(player.x, WIDTH - player.w);
+
+  player.update(1 / 60, fakeInput({ dragDelta: -100000 }));
+  assert.equal(player.x, 0);
 });
