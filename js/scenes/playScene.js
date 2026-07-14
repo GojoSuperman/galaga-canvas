@@ -16,7 +16,12 @@ const INITIAL_LIVES = 3;
 const RESPAWN_DELAY = 1.2;   // 초 — 사망 후 부활까지
 const STAGE_CLEAR_DELAY = 2; // 초 — 클리어 문구 표시 시간
 
-export function createPlayScene(game) {
+/**
+ * 플레이 씬.
+ * params.startStage — 시작할 스테이지 인덱스(0부터). 기본 0.
+ * 보스전처럼 뒤쪽 스테이지를 바로 확인할 때 쓴다 (밸런싱·검증용).
+ */
+export function createPlayScene(game, { startStage = 0 } = {}) {
   const stars = createStarfield();
   const playerBullets = createBulletPool(48);
   const enemyBullets = createBulletPool(64);
@@ -26,7 +31,7 @@ export function createPlayScene(game) {
 
   let score = 0;
   let lives = INITIAL_LIVES;
-  let stageIndex = 0;
+  let stageIndex = startStage;
   let phase = 'playing'; // 'playing' | 'respawning' | 'stageClear'
   let phaseTimer = 0;
   let paused = false;
