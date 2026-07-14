@@ -65,3 +65,10 @@ test('getStage는 범위를 넘으면 마지막 스테이지를 준다', () => {
   assert.equal(getStage(0), STAGES[0]);
   assert.equal(getStage(99), STAGES[4]);
 });
+
+test('보스 스테이지는 보스 티어를 갖는다', () => {
+  for (const [i, stage] of STAGES.entries()) {
+    if (!stage.isBoss) continue;
+    assert.ok(stage.bossTier >= 1, `스테이지 ${i + 1}: bossTier 누락`);
+  }
+});

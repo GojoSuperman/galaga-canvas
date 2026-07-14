@@ -8,6 +8,7 @@ const CAPTAIN_PALETTE = { G: '#4fd97a', B: '#2b7de0', W: '#ffffff', '.': null };
 const BOSS_PALETTE = { V: '#9b30d9', M: '#e0409b', C: '#5ce1e6', W: '#ffffff', K: '#2a0a3a', '.': null };
 const SHOT_PALETTE = { W: '#ffffff', C: '#7ff0ff', '.': null };
 const ENEMY_SHOT_PALETTE = { R: '#ff5a5a', Y: '#ffd24a', '.': null };
+const ELITE_PALETTE = { O: '#ff8c1a', R: '#c22e2e', W: '#ffffff', '.': null };
 
 export const SPRITES = {
   player: {
@@ -55,6 +56,18 @@ export const SPRITES = {
       'GGWGG',
       'GBBBG',
       '.G.G.',
+    ],
+  },
+
+  // 적 D — 엘리트 (체력 3, 조준탄). 각지고 공격적인 실루엣.
+  elite: {
+    palette: ELITE_PALETTE,
+    rows: [
+      'R.R.R',
+      'ROOOR',
+      'OOWOO',
+      'ROOOR',
+      '.R.R.',
     ],
   },
 

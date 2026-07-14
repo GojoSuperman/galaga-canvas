@@ -105,6 +105,25 @@ test('적 타입마다 체력이 다르다 (벌 1, 나비 1, 캡틴 2)', () => {
   assert.equal(ENEMY_TYPES.captain.hp, 2);
 });
 
+test('elite는 체력 3이고 조준탄 플래그를 가진다', () => {
+  assert.equal(ENEMY_TYPES.elite.hp, 3);
+  assert.equal(ENEMY_TYPES.elite.aimed, true);
+});
+
+test('elite는 3방 맞아야 죽는다', () => {
+  const enemy = makeEnemy({ type: 'elite' });
+  assert.equal(enemy.hit(1), false);
+  assert.equal(enemy.hit(1), false);
+  assert.equal(enemy.hit(1), true);
+  assert.equal(enemy.alive, false);
+});
+
+test('일반 적은 조준탄을 쏘지 않는다', () => {
+  assert.ok(!ENEMY_TYPES.bee.aimed);
+  assert.ok(!ENEMY_TYPES.butterfly.aimed);
+  assert.ok(!ENEMY_TYPES.captain.aimed);
+});
+
 test('진입 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () => {
   const formation = createFormation();
   const enemy = makeEnemy({ formation, col: 3, row: 1, entryDuration: 2.5 });

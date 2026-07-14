@@ -44,6 +44,20 @@ export const ENTRY_PATHS = {
     P(slot.x + 120, 140),
     P(slot.x, slot.y),
   ],
+  // 화면 왼쪽 위 밖에서 출발해 오른쪽으로 크게 휘었다가 슬롯으로 돌아온다.
+  spiralLeft: (slot) => [
+    P(-50, -50),
+    P(WIDTH * 0.95, HEIGHT * 0.30),
+    P(WIDTH * 0.05, HEIGHT * 0.42),
+    P(slot.x, slot.y),
+  ],
+  // spiralLeft의 좌우 대칭.
+  spiralRight: (slot) => [
+    P(WIDTH + 50, -50),
+    P(WIDTH * 0.05, HEIGHT * 0.30),
+    P(WIDTH * 0.95, HEIGHT * 0.42),
+    P(slot.x, slot.y),
+  ],
 };
 
 /**

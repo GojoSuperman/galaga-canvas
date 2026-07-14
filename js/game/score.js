@@ -5,6 +5,7 @@ export const ENEMY_BASE_SCORE = {
   bee: 50,
   butterfly: 80,
   captain: 150,
+  elite: 250,
 };
 
 /** 보스 격파 점수. 티어별로 다르다. */

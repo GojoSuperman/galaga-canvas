@@ -13,6 +13,10 @@ export const ENEMY_TYPES = {
   bee: { hp: 1, sprite: 'bee', w: 15, h: 15 },
   butterfly: { hp: 1, sprite: 'butterfly', w: 15, h: 15 },
   captain: { hp: 2, sprite: 'captain', w: 15, h: 15 },
+  // 엘리트 — 단단하고, 급강하 중 플레이어를 조준해서 쏜다.
+  elite: {
+    hp: 3, sprite: 'elite', w: 15, h: 15, aimed: true,
+  },
 };
 
 const RETURN_DURATION = 2.5; // 초 — 화면 위에서 슬롯까지 복귀하는 시간

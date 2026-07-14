@@ -37,3 +37,17 @@ test('스테이지 클리어 보너스는 스테이지 번호에 비례한다', 
 test('최종 보스 격파 점수가 중간 보스보다 높다', () => {
   assert.ok(BOSS_SCORE[2] > BOSS_SCORE[1]);
 });
+
+test('elite는 캡틴보다 점수가 높다', () => {
+  assert.ok(ENEMY_BASE_SCORE.elite > ENEMY_BASE_SCORE.captain);
+});
+
+test('급강하 중인 elite는 2배 점수', () => {
+  const enemy = { type: 'elite', state: ENEMY_STATE.DIVING };
+  assert.equal(scoreFor(enemy), ENEMY_BASE_SCORE.elite * 2);
+});
+
+test('보스 점수는 티어별로 고정 값이다', () => {
+  assert.equal(BOSS_SCORE[1], 5000);
+  assert.equal(BOSS_SCORE[2], 12000);
+});

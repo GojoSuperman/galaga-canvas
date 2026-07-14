@@ -9,8 +9,8 @@ import { createParticlePool } from '../game/particles.js';
 import { forEachHit } from '../game/collision.js';
 import { scoreFor, STAGE_CLEAR_BONUS, BOSS_SCORE } from '../game/score.js';
 import { getStage, STAGES } from '../stages/stages.js';
-import { ENEMY_STATE, createEnemy } from '../game/enemy.js';
-import { createBoss } from '../game/boss.js';
+import { ENEMY_STATE, ENEMY_TYPES, createEnemy } from '../game/enemy.js';
+import { createBoss, aimedShot } from '../game/boss.js';
 
 const INITIAL_LIVES = 3;
 const RESPAWN_DELAY = 1.2;   // 초 — 사망 후 부활까지
@@ -61,20 +61,26 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
     }
   }
 
-  /** 급강하 중인 적이 주기적으로 사격한다. */
+  /** 급강하 중인 적이 주기적으로 사격한다. elite는 플레이어를 조준한다. */
   function enemyShooting(dt) {
     for (const enemy of livingEnemies()) {
       if (enemy.state !== ENEMY_STATE.DIVING) continue;
       enemy.shootTimer -= dt;
       if (enemy.shootTimer > 0) continue;
       enemy.shootTimer = stage().enemyShootInterval;
+
+      const originX = enemy.x + enemy.w / 2;
+      const originY = enemy.y + enemy.h;
+      const speed = stage().enemyBulletSpeed;
+
+      // 엘리트는 플레이어를 향해 쏜다. 나머지는 그대로 아래로 쏜다.
+      const aimed = ENEMY_TYPES[enemy.type].aimed && player.alive;
+      const { vx, vy } = aimed
+        ? aimedShot(originX, originY, player.x + player.w / 2, player.y + player.h / 2, speed)
+        : { vx: 0, vy: speed };
+
       enemyBullets.spawn({
-        x: enemy.x + enemy.w / 2 - 1.5,
-        y: enemy.y + enemy.h,
-        vy: stage().enemyBulletSpeed,
-        w: 3,
-        h: 12,
-        sprite: 'enemyShot',
+        x: originX - 1.5, y: originY, vx, vy, w: 3, h: 12, sprite: 'enemyShot',
       });
     }
   }
@@ -142,6 +148,10 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
         formation.update(dt);
         spawner.update(dt);
         for (const e of livingEnemies()) e.update(dt);
+        // 보스도 계속 움직이고 쏴야 한다 (안 그러면 죽을수록 보스전이 쉬워진다).
+        // 단, 졸개 소환(wantsSummon)은 'playing' 분기에서만 처리한다 — 부활하자마자
+        // 화면이 졸개로 가득 차는 상황을 막기 위해서다.
+        if (boss?.alive) boss.update(dt, player.x + player.w / 2, player.y);
         playerBullets.update(dt, { width: WIDTH, height: HEIGHT });
         enemyBullets.update(dt, { width: WIDTH, height: HEIGHT });
         return;
