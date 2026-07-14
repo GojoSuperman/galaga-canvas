@@ -104,3 +104,53 @@ test('적 타입마다 체력이 다르다 (벌 1, 나비 1, 캡틴 2)', () => {
   assert.equal(ENEMY_TYPES.butterfly.hp, 1);
   assert.equal(ENEMY_TYPES.captain.hp, 2);
 });
+
+test('진입 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () => {
+  const formation = createFormation();
+  const enemy = makeEnemy({ formation, col: 3, row: 1, entryDuration: 2.5 });
+
+  let prevX = enemy.x;
+  let maxJump = 0;
+  // 진입(2.5초) + 합류 직후까지 넉넉히 돌린다.
+  for (let i = 0; i < 60 * 4; i += 1) {
+    formation.update(1 / 60);
+    enemy.update(1 / 60);
+    maxJump = Math.max(maxJump, Math.abs(enemy.x - prevX));
+    prevX = enemy.x;
+  }
+  assert.equal(enemy.state, ENEMY_STATE.IN_FORMATION);
+  // 한 프레임에 5px 넘게 튀면 눈에 보이는 순간이동이다.
+  assert.ok(maxJump < 5, `진입 합류에서 ${maxJump.toFixed(1)}px 순간이동 발생`);
+});
+
+test('복귀 완료 시 대형에 튀지 않고 매끄럽게 합류한다', () => {
+  const formation = createFormation();
+  const enemy = makeEnemy({ formation, col: 3, row: 1, entryDuration: 0.1 });
+
+  // 먼저 대형에 합류시킨다.
+  for (let i = 0; i < 20; i += 1) { formation.update(1 / 60); enemy.update(1 / 60); }
+  assert.equal(enemy.state, ENEMY_STATE.IN_FORMATION);
+
+  enemy.startDive(240, 2.0);
+
+  let prevX = enemy.x;
+  let maxJump = 0;
+  let sawReturning = false;
+  // 급강하(2초) + 복귀(2.5초)를 다 돌리고 대형 합류까지 본다.
+  for (let i = 0; i < 60 * 6; i += 1) {
+    formation.update(1 / 60);
+    enemy.update(1 / 60);
+    // 급강하 중에는 화면 밖으로 나갔다 위에서 재등장하므로 큰 이동이 정상이다.
+    // DIVING→RETURNING으로 바뀌는 그 프레임 자체가 "화면 밖에서 재등장"하는 순간이라
+    // (y가 화면 아래→위로 튀어 어차피 안 보인다) sawReturning을 그 프레임이 지난 "뒤"부터
+    // true로 켜서, 재등장 프레임은 측정에서 제외하고 그 이후 대형 합류 과정만 잰다.
+    if (sawReturning) {
+      maxJump = Math.max(maxJump, Math.abs(enemy.x - prevX));
+    }
+    if (enemy.state === ENEMY_STATE.RETURNING) sawReturning = true;
+    prevX = enemy.x;
+  }
+  assert.ok(sawReturning, 'RETURNING 상태를 거치지 않았다');
+  assert.equal(enemy.state, ENEMY_STATE.IN_FORMATION);
+  assert.ok(maxJump < 5, `복귀 합류에서 ${maxJump.toFixed(1)}px 순간이동 발생`);
+});

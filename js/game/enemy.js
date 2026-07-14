@@ -1,5 +1,5 @@
 import { createPathFollower, ENTRY_PATHS, divePath } from './paths.js';
-import { SLOT_W, SLOT_H } from './formation.js';
+import { SLOT_W, SLOT_H, swayOffset } from './formation.js';
 
 export const ENEMY_STATE = {
   ENTERING: 'ENTERING',
@@ -33,6 +33,11 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
   const buildEntry = ENTRY_PATHS[entryPath];
   if (!buildEntry) throw new Error(`알 수 없는 진입 경로입니다: ${entryPath}`);
 
+  const entryFollower = createPathFollower(buildEntry(target), entryDuration);
+  // 초기 위치는 슬롯이 아니라 진입 경로의 시작점이어야 한다.
+  // (슬롯으로 잡으면 첫 프레임에 경로 시작점으로 순간이동하는 별개의 팝이 생긴다.)
+  const startPos = entryFollower.position();
+
   const enemy = {
     type,
     col,
@@ -42,9 +47,11 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
     hp: spec.hp,
     alive: true,
     state: ENEMY_STATE.ENTERING,
-    x: target.x,
-    y: target.y,
-    follower: createPathFollower(buildEntry(target), entryDuration),
+    x: startPos.x,
+    y: startPos.y,
+    follower: entryFollower,
+    // 경로를 만든 시점의 흔들림 오프셋. 이후 흔들림과의 차이만큼 x를 보정한다.
+    swayAtBuild: swayOffset(formation.time),
     shootTimer: 0, // 급강하 중 사격 쿨다운 (playScene이 관리)
 
     /** 대형에 있는 적만 급강하할 수 있다. */
@@ -60,7 +67,10 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
         case ENEMY_STATE.ENTERING: {
           this.follower.update(dt);
           const pos = this.follower.position();
-          this.x = pos.x;
+          // 경로는 만들 때의 슬롯 위치로 고정돼 있다. 그 사이 대형이 흔들린 만큼 x를 보정해
+          // 경로 끝점이 현재 슬롯을 정확히 따라가게 한다 (보정하지 않으면 합류 순간 수십 px 순간이동한다).
+          const swayDelta = swayOffset(formation.time) - this.swayAtBuild;
+          this.x = pos.x + swayDelta;
           this.y = pos.y;
           if (this.follower.done) this.state = ENEMY_STATE.IN_FORMATION;
           break;
@@ -87,7 +97,10 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
         case ENEMY_STATE.RETURNING: {
           this.follower.update(dt);
           const pos = this.follower.position();
-          this.x = pos.x;
+          // 경로는 만들 때의 슬롯 위치로 고정돼 있다. 그 사이 대형이 흔들린 만큼 x를 보정해
+          // 경로 끝점이 현재 슬롯을 정확히 따라가게 한다 (보정하지 않으면 합류 순간 수십 px 순간이동한다).
+          const swayDelta = swayOffset(formation.time) - this.swayAtBuild;
+          this.x = pos.x + swayDelta;
           this.y = pos.y;
           if (this.follower.done) this.state = ENEMY_STATE.IN_FORMATION;
           break;
@@ -98,6 +111,7 @@ export function createEnemy({ type, col, row, entryPath, entryDuration = 2.5, fo
     /** 화면 아래로 빠진 뒤 위에서 재진입해 슬롯으로 돌아온다. */
     startReturn() {
       this.state = ENEMY_STATE.RETURNING;
+      this.swayAtBuild = swayOffset(formation.time);
       const slotTarget = centerInSlot(formation.slotAt(this.col, this.row), this.w, this.h);
       const entryX = slotTarget.x;
       this.follower = createPathFollower([
