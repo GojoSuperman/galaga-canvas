@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  bossPhase, spreadShot, aimedShot, createBoss, BOSS_TIERS,
-} from '../js/game/boss.js';
+import { bossPhase, createBoss, BOSS_TIERS } from '../js/game/boss.js';
+// 사격 기하는 보스 전용이 아니라 shooting.js에 있다 (엘리트 적도 쓴다).
+import { spreadShot, aimedShot } from '../js/game/shooting.js';
 
 const fakeGame = { audio: { play() {} }, sprites: { get: () => null } };
 const fakeBullets = { spawn: () => ({}), items: [] };

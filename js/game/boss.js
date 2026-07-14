@@ -1,7 +1,6 @@
 import { WIDTH } from '../config.js';
 import { spreadShot, aimedShot } from './shooting.js';
 
-export { spreadShot, aimedShot };
 
 export const BOSS_W = 48; // 16px × scale 3
 export const BOSS_H = 36; // 12px × scale 3
