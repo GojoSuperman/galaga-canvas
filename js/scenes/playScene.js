@@ -127,6 +127,7 @@ export function createPlayScene(game) {
         formation.update(dt);
         spawner.update(dt);
         for (const e of livingEnemies()) e.update(dt);
+        playerBullets.update(dt, { width: WIDTH, height: HEIGHT });
         enemyBullets.update(dt, { width: WIDTH, height: HEIGHT });
         return;
       }
@@ -170,8 +171,7 @@ export function createPlayScene(game) {
       if (player.alive && player.invulnTimer === 0) {
         forEachHit(livingEnemies().filter((e) => e.state === ENEMY_STATE.DIVING), [player],
           (enemy) => {
-            enemy.hit(999);
-            killEnemy(enemy);
+            if (enemy.hit(999)) killEnemy(enemy);
             if (player.hit()) playerDies();
           });
       }
