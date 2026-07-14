@@ -85,6 +85,94 @@ export const STAGES = [
     isBoss: true,
     bossTier: 1,
   },
+
+  // ── 스테이지 6 — 엘리트 등장. 조준탄이 처음 날아온다 ──────────
+  {
+    waves: [
+      { type: 'elite', entryPath: 'topDive', row: 0, cols: [3, 4], delay: 0 },
+      { type: 'butterfly', entryPath: 'spiralLeft', row: 1, cols: [1, 2, 3, 4, 5, 6], delay: 1.0 },
+      { type: 'bee', entryPath: 'leftLoop', row: 2, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 2.0 },
+      { type: 'captain', entryPath: 'rightLoop', row: 3, cols: [2, 5], delay: 3.0 },
+    ],
+    diveInterval: 1.4,
+    diveCount: 2,
+    diveDuration: 2.2,
+    enemyBulletSpeed: 245,
+    enemyShootInterval: 0.70,
+    dropRate: 0.12,
+    isBoss: false,
+  },
+
+  // ── 스테이지 7 — 나선 진입 본격화, 엘리트 4기 ────────────────
+  {
+    waves: [
+      { type: 'elite', entryPath: 'spiralRight', row: 0, cols: [2, 3, 4, 5], delay: 0 },
+      { type: 'captain', entryPath: 'topDive', row: 1, cols: [0, 7], delay: 1.0 },
+      { type: 'butterfly', entryPath: 'spiralLeft', row: 2, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 2.0 },
+      { type: 'bee', entryPath: 'rightLoop', row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 3.2 },
+      { type: 'bee', entryPath: 'leftLoop', row: 4, cols: [3, 4], delay: 4.2 },
+    ],
+    diveInterval: 1.3,
+    diveCount: 3,
+    diveDuration: 2.1,
+    enemyBulletSpeed: 255,
+    enemyShootInterval: 0.65,
+    dropRate: 0.12,
+    isBoss: false,
+  },
+
+  // ── 스테이지 8 — 단단한 적 위주. 화력이 부족하면 벽에 막힌다 ──
+  {
+    waves: [
+      { type: 'elite', entryPath: 'spiralLeft', row: 0, cols: [1, 3, 4, 6], delay: 0 },
+      { type: 'captain', entryPath: 'spiralRight', row: 1, cols: [0, 2, 5, 7], delay: 1.0 },
+      { type: 'butterfly', entryPath: 'topDive', row: 2, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 2.0 },
+      { type: 'butterfly', entryPath: 'leftLoop', row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 3.2 },
+      { type: 'bee', entryPath: 'rightLoop', row: 4, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 4.4 },
+    ],
+    diveInterval: 1.15,
+    diveCount: 3,
+    diveDuration: 2.0,
+    enemyBulletSpeed: 265,
+    enemyShootInterval: 0.60,
+    dropRate: 0.14,
+    isBoss: false,
+  },
+
+  // ── 스테이지 9 — 대형이 거의 꽉 찬다. 최종 보스 직전의 벽 ─────
+  {
+    waves: [
+      { type: 'elite', entryPath: 'spiralLeft', row: 0, cols: [1, 2, 5, 6], delay: 0 },
+      { type: 'captain', entryPath: 'spiralRight', row: 0, cols: [0, 3, 4, 7], delay: 0.8 },
+      { type: 'butterfly', entryPath: 'topDive', row: 1, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 1.8 },
+      { type: 'butterfly', entryPath: 'leftLoop', row: 2, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 3.0 },
+      { type: 'bee', entryPath: 'rightLoop', row: 3, cols: [0, 1, 2, 3, 4, 5, 6, 7], delay: 4.2 },
+      { type: 'bee', entryPath: 'leftLoop', row: 4, cols: [2, 3, 4, 5], delay: 5.4 },
+    ],
+    diveInterval: 1.0,
+    diveCount: 4,
+    diveDuration: 1.9,
+    enemyBulletSpeed: 280,
+    enemyShootInterval: 0.55,
+    dropRate: 0.15,
+    isBoss: false,
+  },
+
+  // ── 스테이지 10 — 최종 보스. 엘리트 호위 6기 ─────────────────
+  {
+    waves: [
+      { type: 'elite', entryPath: 'spiralLeft', row: 2, cols: [0, 1, 2], delay: 2.0 },
+      { type: 'elite', entryPath: 'spiralRight', row: 2, cols: [5, 6, 7], delay: 2.0 },
+    ],
+    diveInterval: 2.2,
+    diveCount: 1,
+    diveDuration: 2.2,
+    enemyBulletSpeed: 280,
+    enemyShootInterval: 0.7,
+    dropRate: 0.25, // 최종전은 드롭을 후하게
+    isBoss: true,
+    bossTier: 2, // 최종 보스
+  },
 ];
 
 /** 범위를 넘어가면 마지막 스테이지를 돌려준다. */

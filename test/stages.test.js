@@ -5,13 +5,25 @@ import { ENEMY_TYPES } from '../js/game/enemy.js';
 import { ENTRY_PATHS } from '../js/game/paths.js';
 import { FORMATION_COLS, FORMATION_ROWS } from '../js/game/formation.js';
 
-test('스테이지는 5개다', () => {
-  assert.equal(STAGES.length, 5);
+test('스테이지는 10개다', () => {
+  assert.equal(STAGES.length, 10);
 });
 
-test('마지막 스테이지만 보스전이다', () => {
-  STAGES.slice(0, 4).forEach((s, i) => assert.equal(s.isBoss, false, `스테이지 ${i + 1}`));
-  assert.equal(STAGES[4].isBoss, true);
+test('보스는 5스테이지와 10스테이지 두 곳이다', () => {
+  const bossIndexes = STAGES.map((s, i) => (s.isBoss ? i : -1)).filter((i) => i >= 0);
+  assert.deepEqual(bossIndexes, [4, 9]); // 0-based → 5스테이지, 10스테이지
+});
+
+test('보스 스테이지는 티어를 갖고, 최종 보스가 더 높은 티어다', () => {
+  assert.equal(STAGES[4].bossTier, 1);
+  assert.equal(STAGES[9].bossTier, 2);
+});
+
+test('보스가 아닌 스테이지는 bossTier를 갖지 않는다', () => {
+  for (const [i, stage] of STAGES.entries()) {
+    if (stage.isBoss) continue;
+    assert.equal(stage.bossTier, undefined, `스테이지 ${i + 1}에 불필요한 bossTier`);
+  }
 });
 
 test('모든 웨이브가 유효한 적 타입과 진입 경로를 쓴다', () => {
@@ -47,23 +59,27 @@ test('한 슬롯(행,열)에 적이 둘 이상 배정되지 않는다', () => {
   }
 });
 
-test('난이도는 스테이지가 올라갈수록 높아진다', () => {
-  const normal = STAGES.slice(0, 4);
+test('일반 스테이지의 난이도는 뒤로 갈수록 높아진다', () => {
+  const normal = STAGES.filter((s) => !s.isBoss);
   for (let i = 1; i < normal.length; i += 1) {
     assert.ok(
       normal[i].diveInterval <= normal[i - 1].diveInterval,
-      `스테이지 ${i + 1}: 급강하 간격이 더 짧아져야 한다`,
+      `${i + 1}번째 일반 스테이지: 급강하 간격이 더 짧아져야 한다`,
     );
     assert.ok(
       normal[i].enemyBulletSpeed >= normal[i - 1].enemyBulletSpeed,
-      `스테이지 ${i + 1}: 탄속이 느려지면 안 된다`,
+      `${i + 1}번째 일반 스테이지: 탄속이 느려지면 안 된다`,
+    );
+    assert.ok(
+      normal[i].diveCount >= normal[i - 1].diveCount,
+      `${i + 1}번째 일반 스테이지: 동시 급강하 수가 줄면 안 된다`,
     );
   }
 });
 
 test('getStage는 범위를 넘으면 마지막 스테이지를 준다', () => {
   assert.equal(getStage(0), STAGES[0]);
-  assert.equal(getStage(99), STAGES[4]);
+  assert.equal(getStage(99), STAGES[STAGES.length - 1]);
 });
 
 test('보스 스테이지는 보스 티어를 갖는다', () => {
