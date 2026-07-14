@@ -1,4 +1,6 @@
 node_modules/
 .superpowers/
+.bkit/
+.mswai/
 .DS_Store
 *.log
