@@ -51,3 +51,17 @@ test('풀이 꽉 차면 null을 반환한다', () => {
   const overflow = pool.spawn({ x: 0, y: 300, vy: -400, w: 3, h: 8, sprite: 's' });
   assert.equal(overflow, null);
 });
+
+test('화면 왼쪽으로 나가면 죽는다', () => {
+  const pool = createBulletPool(4);
+  pool.spawn({ x: 5, y: 300, vx: -400, vy: 0, w: 3, h: 8, sprite: 's' });
+  pool.update(0.2, BOUNDS);
+  assert.equal(pool.aliveCount(), 0);
+});
+
+test('화면 오른쪽으로 나가면 죽는다', () => {
+  const pool = createBulletPool(4);
+  pool.spawn({ x: 475, y: 300, vx: 400, vy: 0, w: 3, h: 8, sprite: 's' });
+  pool.update(0.2, BOUNDS);
+  assert.equal(pool.aliveCount(), 0);
+});
