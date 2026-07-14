@@ -1,5 +1,11 @@
 # Galaga Shooter
 
+### ▶ [지금 바로 플레이하기](https://gojosuperman.github.io/galaga-canvas/)
+
+설치도 빌드도 필요 없다. 링크만 열면 된다 — PC는 키보드, 스마트폰은 터치로.
+
+---
+
 Galaga 스타일 세로 스크롤 슈팅 게임. HTML5 canvas + 순수 ES 모듈로 만들었고, **외부 파일이 전혀 없다**:
 
 - 스프라이트: `js/gfx/pixels.js`의 픽셀 맵 + 팔레트를 코드에서 그린다 (이미지 파일 0개).
@@ -7,6 +13,12 @@ Galaga 스타일 세로 스크롤 슈팅 게임. HTML5 canvas + 순수 ES 모듈
 - 의존성: `npm install`이 필요 없다 (`package.json`의 `dependencies` 자체가 없음).
 
 ## 실행 방법
+
+### 그냥 플레이하려면
+
+**https://gojosuperman.github.io/galaga-canvas/** — GitHub Pages에 배포돼 있다. `main`에 푸시하면 테스트를 돌린 뒤 자동 배포된다 (`.github/workflows/deploy.yml`).
+
+### 직접 돌리려면
 
 ```
 npm run serve
