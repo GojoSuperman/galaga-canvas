@@ -2,6 +2,9 @@ import { WIDTH, HEIGHT } from '../config.js';
 
 const P = (x, y) => ({ x, y });
 
+/** 값을 [min, max] 범위로 자른다. */
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 /** 3차 베지어 곡선 위의 점. t는 0~1. */
 export function cubicBezier(p0, p1, p2, p3, t) {
   const u = 1 - t;
@@ -47,11 +50,15 @@ export const ENTRY_PATHS = {
  * 급강하 경로. 대형의 자기 자리(from)에서 출발해 플레이어 쪽으로 휘며 화면 아래로 빠진다.
  */
 export function divePath(from, playerX) {
+  // 관성을 유지하려고 플레이어를 지나쳐 더 나아가되, 화면 밖으로 새지 않게 x를 자른다.
+  // 베지어는 제어점들의 볼록 껍질 안에 갇히므로, 마지막 x만 화면 안으로 자르면 곡선 전체가 화면 안에 머문다.
+  const exitX = clamp(playerX + (playerX - from.x) * 0.3, 0, WIDTH);
+
   return [
     P(from.x, from.y),
     P(from.x + (playerX - from.x) * 0.2, from.y + 140), // 살짝 플레이어 쪽으로
     P(playerX, HEIGHT * 0.7),                            // 플레이어 바로 위를 지난다
-    P(playerX + (playerX - from.x) * 0.3, HEIGHT + 40),  // 관성을 유지하며 이탈
+    P(exitX, HEIGHT + 40),                               // 화면 아래로 이탈
   ];
 }
 

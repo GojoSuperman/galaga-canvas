@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { cubicBezier, ENTRY_PATHS, divePath, createPathFollower } from '../js/game/paths.js';
-import { HEIGHT } from '../js/config.js';
+import { WIDTH, HEIGHT } from '../js/config.js';
 
 const P = (x, y) => ({ x, y });
 
@@ -66,4 +66,14 @@ test('경로 추종기는 duration을 넘겨도 끝점을 유지한다', () => {
   follower.update(99);
   assert.equal(follower.done, true);
   assert.ok(Math.abs(follower.position().x - 10) < 0.001);
+});
+
+test('급강하 경로는 극단적인 대각선에서도 화면 좌우를 벗어나지 않는다', () => {
+  // 오른쪽 끝 대형 슬롯의 적이 왼쪽 끝 플레이어에게 급강하하는, 가장 기울어진 경우.
+  // 예전에는 이 조합에서 곡선이 화면 왼쪽(x < 0)으로 빠져나갔다.
+  const points = divePath(P(408, 230), 20);
+  for (let t = 0; t <= 1.0001; t += 0.05) {
+    const { x } = cubicBezier(...points, Math.min(t, 1));
+    assert.ok(x >= 0 && x <= WIDTH, `t=${t.toFixed(2)}에서 화면 밖: x=${x.toFixed(1)}`);
+  }
 });
