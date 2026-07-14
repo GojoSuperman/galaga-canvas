@@ -116,11 +116,13 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
       return;
     }
     formation = createFormation();
-    spawner = createSpawner(getStage(stageIndex), { formation, game });
-    diveTimer = getStage(stageIndex).diveInterval;
+    spawner = createSpawner(stage(), { formation, game });
+    diveTimer = stage().diveInterval;
     playerBullets.items.forEach((b) => { b.alive = false; });
     enemyBullets.items.forEach((b) => { b.alive = false; });
-    boss = getStage(stageIndex).isBoss ? createBoss(game, enemyBullets, getStage(stageIndex).bossTier) : null;
+    boss = stage().isBoss ? createBoss(game, enemyBullets, stage().bossTier) : null;
+    // 어떤 경로로든 죽은 채로 스테이지를 넘어오면 안 된다.
+    if (!player.alive) player.respawn();
     phase = 'playing';
   }
 
@@ -261,6 +263,11 @@ export function createPlayScene(game, { startStage = 0 } = {}) {
           game.audio?.play('powerup');
         });
       }
+
+      // 충돌 처리 중 사망/게임오버가 일어났으면 이번 프레임의 나머지는 건너뛴다.
+      // (그러지 않으면 같은 프레임에 마지막 적도 죽었을 때 checkStageClear가
+      //  'respawning'을 'stageClear'로 덮어써서, 부활하지 못한 채 다음 스테이지로 넘어간다.)
+      if (phase !== 'playing') return;
 
       checkStageClear();
     },
