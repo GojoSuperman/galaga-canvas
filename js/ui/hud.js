@@ -24,6 +24,7 @@ export function createHud(game) {
       ctx.fillText(String(Math.max(game.highScores.best(), score)).padStart(6, '0'), WIDTH - 10, 32);
 
       // 우하단 — 스테이지 + 무기 레벨
+      ctx.textAlign = 'right';
       ctx.fillStyle = '#fff';
       ctx.fillText(`STAGE ${stageNumber}`, WIDTH - 10, HEIGHT - 26);
       ctx.fillStyle = '#ffd24a';

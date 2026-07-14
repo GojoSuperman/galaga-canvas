@@ -156,7 +156,7 @@ export function createBoss(game, enemyBullets, tier = 1) {
       const barW = WIDTH - 80;
       const barH = 8;
       const barX = 40;
-      const barY = 24;
+      const barY = 46;
 
       ctx.fillStyle = '#3a1020';
       ctx.fillRect(barX, barY, barW, barH);
@@ -172,6 +172,7 @@ export function createBoss(game, enemyBullets, tier = 1) {
 
       ctx.fillStyle = '#fff';
       ctx.font = '10px monospace';
+      ctx.textAlign = 'left';
       ctx.fillText(`${label}  PHASE ${this.phase}`, barX, barY - 4);
     },
   };
