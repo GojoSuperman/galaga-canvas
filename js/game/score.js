@@ -7,7 +7,8 @@ export const ENEMY_BASE_SCORE = {
   captain: 150,
 };
 
-export const BOSS_SCORE = 5000;
+/** 보스 격파 점수. 티어별로 다르다. */
+export const BOSS_SCORE = { 1: 5000, 2: 12000 };
 
 /** 스테이지 클리어 보너스 — 뒤로 갈수록 커진다. */
 export const STAGE_CLEAR_BONUS = (stageNumber) => stageNumber * 500;

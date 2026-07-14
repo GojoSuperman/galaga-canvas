@@ -7,9 +7,10 @@ import { createFormation } from '../game/formation.js';
 import { createSpawner } from '../game/spawner.js';
 import { createParticlePool } from '../game/particles.js';
 import { forEachHit } from '../game/collision.js';
-import { scoreFor, STAGE_CLEAR_BONUS } from '../game/score.js';
+import { scoreFor, STAGE_CLEAR_BONUS, BOSS_SCORE } from '../game/score.js';
 import { getStage, STAGES } from '../stages/stages.js';
-import { ENEMY_STATE } from '../game/enemy.js';
+import { ENEMY_STATE, createEnemy } from '../game/enemy.js';
+import { createBoss } from '../game/boss.js';
 
 const INITIAL_LIVES = 3;
 const RESPAWN_DELAY = 1.2;   // 초 — 사망 후 부활까지
@@ -33,8 +34,11 @@ export function createPlayScene(game) {
   let formation = createFormation();
   let spawner = createSpawner(getStage(stageIndex), { formation, game });
   let diveTimer = getStage(stageIndex).diveInterval;
+  let boss = null;
 
   function stage() { return getStage(stageIndex); }
+
+  if (stage().isBoss) boss = createBoss(game, enemyBullets, stage().bossTier);
 
   function livingEnemies() {
     return spawner.enemies.filter((e) => e.alive);
@@ -102,12 +106,14 @@ export function createPlayScene(game) {
     diveTimer = getStage(stageIndex).diveInterval;
     playerBullets.items.forEach((b) => { b.alive = false; });
     enemyBullets.items.forEach((b) => { b.alive = false; });
+    boss = getStage(stageIndex).isBoss ? createBoss(game, enemyBullets, getStage(stageIndex).bossTier) : null;
     phase = 'playing';
   }
 
   function checkStageClear() {
     // 스포너가 모든 웨이브를 내보냈고, 남은 적이 없으면 클리어.
     if (!spawner.done || livingEnemies().length > 0) return;
+    if (stage().isBoss && boss?.alive) return; // 보스가 살아 있으면 아직이다
     game.audio?.play('stageClear');
     phase = 'stageClear';
     phaseTimer = STAGE_CLEAR_DELAY;
@@ -156,6 +162,26 @@ export function createPlayScene(game) {
       }
       enemyShooting(dt);
 
+      if (boss?.alive) {
+        boss.update(dt, player.x + player.w / 2, player.y);
+
+        // 보스가 요청하면 졸개를 소환한다 (2페이즈부터).
+        if (boss.wantsSummon) {
+          boss.wantsSummon = false;
+          const freeCols = [1, 3, 5, 7];
+          const col = freeCols[Math.floor(Math.random() * freeCols.length)];
+          spawner.enemies.push(createEnemy({
+            type: 'bee',
+            col,
+            row: 3,
+            entryPath: 'topDive',
+            entryDuration: 2,
+            formation,
+            game,
+          }));
+        }
+      }
+
       playerBullets.update(dt, { width: WIDTH, height: HEIGHT });
       enemyBullets.update(dt, { width: WIDTH, height: HEIGHT });
 
@@ -164,6 +190,19 @@ export function createPlayScene(game) {
         bullet.alive = false;
         if (enemy.hit(1)) killEnemy(enemy);
       });
+
+      // 충돌 1-B: 플레이어 탄 → 보스
+      if (boss?.alive) {
+        forEachHit(playerBullets.items, [boss], (bullet) => {
+          bullet.alive = false;
+          particles.burst(bullet.x, bullet.y, '#5ce1e6', 3);
+          if (boss.hit(1)) {
+            score += BOSS_SCORE[stage().bossTier];
+            particles.burst(boss.x + boss.w / 2, boss.y + boss.h / 2, '#e0409b', 40);
+            game.audio?.play('explosion');
+          }
+        });
+      }
 
       // 충돌 2: 적 탄 → 플레이어
       forEachHit(enemyBullets.items, [player], (bullet) => {
@@ -204,6 +243,7 @@ export function createPlayScene(game) {
       }
       powerups.render(ctx, game.sprites);
       for (const enemy of livingEnemies()) enemy.render(ctx);
+      if (boss?.alive) boss.render(ctx);
       for (const b of playerBullets.items) {
         if (b.alive) ctx.drawImage(game.sprites.get(b.sprite), Math.round(b.x), Math.round(b.y));
       }

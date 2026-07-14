@@ -83,6 +83,7 @@ export const STAGES = [
     enemyShootInterval: 0.8,
     dropRate: 0.20, // 보스전은 드롭을 후하게
     isBoss: true,
+    bossTier: 1,
   },
 ];
 
