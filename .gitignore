@@ -4,3 +4,8 @@ node_modules/
 .mswai/
 .DS_Store
 *.log
+
+# 다른 프로젝트(MapleStory Worlds)용 지침 — 이 저장소와 무관하므로 추적하지 않는다.
+# 로컬 파일은 그대로 남는다.
+AGENTS.md
+CLAUDE.md
